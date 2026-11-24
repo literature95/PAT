@@ -1,0 +1,100 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "patd API",
+    "version": "0.1.0",
+    "description": "PAT 内核 REST + SSE 契约。所有权限在内核侧强制；此文件由契约哨兵测试冻结。"
+  },
+  "servers": [{ "url": "http://127.0.0.1:8088" }],
+  "paths": {
+    "/api/v1/health": {
+      "get": { "operationId": "health", "responses": { "200": { "description": "ok" } } }
+    },
+    "/api/v1/sessions": {
+      "post": {
+        "operationId": "createSession",
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "experiment_id": { "type": "string" } } } } } },
+        "responses": { "201": { "description": "created" } }
+      }
+    },
+    "/api/v1/sessions/{id}/events": {
+      "get": {
+        "operationId": "streamEvents",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "text/event-stream" } }
+      }
+    },
+    "/api/v1/sessions/{id}/events/list": {
+      "get": {
+        "operationId": "listEvents",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "event array" } }
+      }
+    },
+    "/api/v1/sessions/{id}/messages": {
+      "post": {
+        "operationId": "postMessage",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "required": ["text"], "properties": { "text": { "type": "string" }, "actor": { "type": "string", "enum": ["human", "agent"] } } } } } },
+        "responses": { "200": { "description": "reply" } }
+      }
+    },
+    "/api/v1/tools/{name}/plan": {
+      "post": {
+        "operationId": "planTool",
+        "parameters": [{ "name": "name", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "additionalProperties": { "type": "string" } } } } },
+        "responses": { "200": { "description": "preview" } }
+      }
+    },
+    "/api/v1/tools/{name}/execute": {
+      "post": {
+        "operationId": "executeTool",
+        "parameters": [{ "name": "name", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "args": { "type": "object" }, "request_id": { "type": "string" }, "actor": { "type": "string" } } } } } },
+        "responses": { "200": { "description": "result" }, "403": { "description": "permission denied" } }
+      }
+    },
+    "/api/v1/approvals/{requestId}": {
+      "get": {
+        "operationId": "getApproval",
+        "parameters": [{ "name": "requestId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "approval" }, "404": { "description": "not found" } }
+      },
+      "post": {
+        "operationId": "resolveApproval",
+        "parameters": [{ "name": "requestId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "decision": { "type": "string", "enum": ["approve", "deny"] }, "actor": { "type": "string" } } } } } },
+        "responses": { "200": { "description": "resolved" } }
+      }
+    },
+    "/api/v1/capabilities": {
+      "get": { "operationId": "getCapabilities", "responses": { "200": { "description": "capability snapshot" } } }
+    },
+    "/api/v1/scope": {
+      "get": { "operationId": "getScope", "responses": { "200": { "description": "scope" } } }
+    },
+    "/api/v1/permissions/rules": {
+      "get": { "operationId": "getRules", "responses": { "200": { "description": "rules" } } },
+      "post": {
+        "operationId": "setRules",
+        "requestBody": { "content": { "application/json": { "schema": { "type": "object", "properties": { "rules": { "type": "array", "items": { "type": "object" } } } } } } },
+        "responses": { "200": { "description": "rules" } }
+      }
+    },
+    "/api/v1/audit": {
+      "get": {
+        "operationId": "exportAudit",
+        "parameters": [{ "name": "format", "in": "query", "schema": { "type": "string", "enum": ["csv", "markdown", "md"] } }],
+        "responses": { "200": { "description": "audit text", "content": { "text/csv": { "schema": { "type": "string" } } } } }
+      }
+    },
+    "/api/v1/experiments/{id}/cleanup": {
+      "post": {
+        "operationId": "cleanup",
+        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": { "200": { "description": "residue report" } }
+      }
+    }
+  }
+}

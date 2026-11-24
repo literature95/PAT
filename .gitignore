@@ -1,0 +1,12 @@
+# Build output
+bin/
+
+# Runtime state (keep .pat/config.toml tracked)
+.pat/events.db
+.pat/events.db-*
+.pat/artifacts/
+
+# Editor / OS
+*.swp
+.DS_Store
+Thumbs.db

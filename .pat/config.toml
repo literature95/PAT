@@ -1,0 +1,81 @@
+# PAT demo 配置。写操作仍需 PAT_AUTHORIZED=1 + 逐 tool call 审批。
+[msf]
+backend = "auto"                 # auto | cli | mock | rpc | rest
+msf_path = "msfconsole"
+
+[model]
+provider = "fake"                 # fake 无需 API Key；openai 需 consent_external_llm=true
+name = "demo"
+api_key_env = "PAT_API_KEY"
+consent_external_llm = false
+
+[safety]
+confirm_exploit = true
+confirm_payload = true
+allow_auto_recon = true
+require_env_auth = true
+default_dry_run = true
+
+[lab]
+environment_mode = "isolated_lab"
+scope = ["192.168.56.0/24"]
+scope_extra = []
+artifact_dir = ".pat/artifacts"
+
+[capabilities]
+execution = true                  # 注册 nmap_scan / module_execute / console
+mutations = true                  # 注册 payload_generate / cleanup / verdict_record
+batch = false
+credential_injection = false
+credential_reveal = false
+mcp = false
+
+[exec]
+allowlist = ["nmap", "msfconsole"]
+denylist = ["rm", "dd", "mkfs*"]
+concurrency = 3
+timeout_seconds = 300
+
+[[permission.rules]]
+pattern = "module_search(*)"
+action = "allow"
+
+[[permission.rules]]
+pattern = "session_list(*)"
+action = "allow"
+
+[[permission.rules]]
+pattern = "get_capabilities(*)"
+action = "allow"
+
+[[permission.rules]]
+pattern = "audit_export(*)"
+action = "allow"
+
+[[permission.rules]]
+pattern = "nmap_scan(*)"
+action = "ask"
+
+[[permission.rules]]
+pattern = "module_execute(auxiliary/scanner/*)"
+action = "allow"
+
+[[permission.rules]]
+pattern = "module_execute(*)"
+action = "ask"
+
+[[permission.rules]]
+pattern = "payload_generate(*)"
+action = "ask"
+
+[[permission.rules]]
+pattern = "console(*)"
+action = "deny"
+
+[[permission.rules]]
+pattern = "cleanup(*)"
+action = "ask"
+
+[[permission.rules]]
+pattern = "verdict_record(*)"
+action = "ask"
